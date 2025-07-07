@@ -1,0 +1,58 @@
+<div class="product-page-container">
+  <div class="product-images">
+    {{ product.media | media_gallery }}
+  </div>
+
+  <div class="product-details">
+    <h1>{{ product.title }}</h1>
+
+    <p>
+      <strong>Price:</strong> 
+      <span style="font-weight:bold; font-size: 22px;">
+        {{ product.price | money }}
+      </span>
+      {% if product.compare_at_price > product.price %}
+        <del style="margin-left: 10px;">{{ product.compare_at_price | money }}</del>
+        <span style="color:red; margin-left: 5px;">
+          ({{ 100 | minus: product.price | times: 100 | divided_by: product.compare_at_price }}% off)
+        </span>
+      {% endif %}
+    </p>
+
+    <p><strong>SKU:</strong> {{ product.sku }}</p>
+    <p><strong>Origin:</strong> Sri Lanka</p>
+
+    <div class="razorpay-guarantee" style="border: 1px solid #ccc; padding: 15px; border-radius: 8px;">
+      <img src="https://your-razorpay-badge-link.png" alt="Razorpay" style="height: 25px;">
+      <p><strong>Money Back Promise</strong></p>
+      <small>Get 100% refund on non-delivery or defects</small>
+    </div>
+
+    <div class="emi-options" style="border: 1px solid #8b0000; padding: 15px; margin-top: 15px; border-radius: 8px;">
+      <h4>EMI Plans and Pay Later <small>(powered by Razorpay)</small></h4>
+      <p>EMI from ₹471/month</p>
+      <button>View Plans</button>
+      <p>Pay later also available</p>
+    </div>
+
+    {{ form | product_form }}
+
+    <a href="https://wa.me/91XXXXXXXXXX" target="_blank" style="position: fixed; bottom: 20px; left: 20px;">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="50" />
+    </a>
+  </div>
+</div>
+
+<style>
+.product-page-container {
+  display: flex;
+  gap: 40px;
+  padding: 30px;
+}
+.product-images {
+  flex: 1;
+}
+.product-details {
+  flex: 1;
+}
+</style>
