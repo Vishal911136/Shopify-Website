@@ -1,0 +1,80 @@
+{% assign rudraksha_handles = "rudraksha-1,rudraksha-2,rudraksha-3,rudraksha-4,rudraksha-5,rudraksha-6,rudraksha-7,rudraksha-8,rudraksha-9,rudraksha-10,rudraksha-11,rudraksha-12,rudraksha-13,rudraksha-14,rudraksha-15,rudraksha-16,rudraksha-17" | split: "," %}
+
+<style>
+  .builder-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+  .rudraksha-item { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 10px; }
+  .rudraksha-item h3 { margin: 0 0 5px; }
+  .rudraksha-item input { width: 80px; padding: 5px; margin-top: 5px; }
+  #total-price { font-weight: bold; font-size: 20px; margin-top: 20px; }
+  .checkout-btn { background: #0E2D58; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; }
+</style>
+
+<div class="builder-container">
+  <h2>🧿 Rudraksha Chain Custom Builder</h2>
+
+  {% for handle in rudraksha_handles %}
+    {% assign product = all_products[handle] %}
+    {% assign variant = product.variants.first %}
+    
+    <div class="rudraksha-item" data-id="{{ variant.id }}" data-price="{{ variant.price | divided_by: 100 }}" data-available="{{ variant.inventory_quantity }}">
+      <h3>{{ product.title }}</h3>
+      <p>Price: ₹{{ variant.price | money_without_currency }} | Available: {{ variant.inventory_quantity }}</p>
+      <input type="number" class="rudraksha-qty" placeholder="Qty" min="0" max="{{ variant.inventory_quantity }}">
+    </div>
+  {% endfor %}
+
+  <p id="total-price">Total ₹0</p>
+  <button class="checkout-btn" onclick="addToCartAndCheckout()">Add to Cart & Checkout</button>
+</div>
+
+<script>
+  const qtyInputs = document.querySelectorAll('.rudraksha-qty');
+  const totalPriceEl = document.getElementById('total-price');
+
+  function updateTotal() {
+    let total = 0;
+    document.querySelectorAll('.rudraksha-item').forEach(item => {
+      const qty = parseInt(item.querySelector('.rudraksha-qty').value) || 0;
+      const price = parseFloat(item.dataset.price);
+      total += qty * price;
+    });
+    totalPriceEl.textContent = "Total ₹" + total;
+  }
+
+  qtyInputs.forEach(input => {
+    input.addEventListener('input', updateTotal);
+  });
+
+  function addToCartAndCheckout() {
+    const items = [];
+
+    document.querySelectorAll('.rudraksha-item').forEach(item => {
+      const qty = parseInt(item.querySelector('.rudraksha-qty').value) || 0;
+      const variantId = item.dataset.id;
+      if (qty > 0) {
+        items.push({ id: variantId, quantity: qty });
+      }
+    });
+
+    if (items.length === 0) {
+      alert("Please select at least one item.");
+      return;
+    }
+
+    fetch('/cart/clear.js', { method: 'POST' }) // Optional: Clear previous cart
+      .then(() => {
+        return fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items })
+        });
+      })
+      .then(() => {
+        window.location.href = '/checkout';
+      })
+      .catch(err => {
+        console.error("Error adding to cart:", err);
+        alert("Something went wrong.");
+      });
+  }
+</script>
